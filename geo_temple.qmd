@@ -1,0 +1,186 @@
+---
+title: "編"
+subtitle: "サブタイトル"
+author: "宇畑 優太（1260404）"
+date: today
+execute: 
+  echo: true
+  warning: false
+  message: true
+format: 
+  pdf:
+    fig-width: 5
+    fig-height: 3
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    include-in-header:
+      - text: \setlength{\parindent}{1em}
+pdf-engine: lualatex
+documentclass: ltjsarticle 
+lang: ja
+---
+
+# 準備 {-}
+```{r global_option}
+## PDF に出力する際は cairo を使用する
+if (knitr::is_latex_output()) {
+  knitr::opts_chunk$set(dev = "cairo_pdf")
+}
+
+#パッケージの読み込み
+pacman::p_load(tidyverse, 
+               broom, 
+               coefplot, 
+               texreg,
+               bayesplot,
+               rstan,
+               rstanrm,
+               parallel,
+               posterior,
+               cmdstanr,
+               patchwork,
+               ggplot2,
+               tidybayes,
+               ggfortify,
+               gridExtra,
+               forecast,
+               tseries,
+               summarytools,
+               forecast
+               )
+
+#日本語の設定
+if (.Platform$OS.type == "windows") { 
+  if (require(fontregisterer)) {
+    my_font <- "Yu Gothic"
+  } else {
+    my_font <- "Japan1"
+  }
+} else if (capabilities("aqua")) {
+  my_font <- "HiraginoSans-W3"
+} else {
+  my_font <- "IPAexGothic"
+}
+
+theme_set(theme_gray(base_size = 9,
+                     base_family = my_font))
+```
+
+
+```{r}
+#計算の高速化
+rstan_options(auto_write = TRUE) 
+options(mc.cores = parallel::detectCores())
+```
+
+
+ohbo pjbぱ
+
+\newpage
+
+以下のコードで特定の
+
+
+以下のコードがとても便利
+
+```
+draws <- fit$draws(format = "df")
+
+test1 <- draws |> 
+  spread_draws(Y_pred_1[a])
+
+test1 <- test1 |> 
+  median_hdi()
+```
+
+|関数|算出する値|
+|--|--|
+|mean_qi|平均値および分位点区間|
+|median_qi|中央値および分位点区間|
+|mode_qi|最頻値および分位点区間|
+|mean_hdi|平均値およびHDI (多峰の場合は複数の区間を算出)|
+|median_hdi|中央値およびHDI (多峰の場合は複数の区間を算出)|
+|mode_hdi|最頻値およびHDI (多峰の場合は複数の区間を算出)|
+|mean_hdci|平均値およびHDI (多峰の場合でも単一の区間のみ算出)|
+|median_hdci|中央値およびHDI (多峰の場合でも単一の区間のみ算出)|
+|mode_hdci|最頻値値およびHDI (多峰の場合でも単一の区間のみ算出|
+
+
+
+```
+#記述統計量
+descr(data,
+      stats = c("n.valid", "mean", "sd", "min", "q1", "med", "q3", "max"))
+```
+
+
+```
+#結果の表示
+fit_1$summary(c("lp__","beta[1]","beta[2]","beta[3]","beta[3]","sigma"))
+```
+
+
+
+```
+#収束の確認
+#rhat
+bayesplot::rhat(fit_1) |> 
+  mcmc_rhat()
+```
+
+```
+#事後分布とトレースプロット
+combo <- mcmc_combo(fit_1$draws(c("beta_0","beta_1","beta_2")))
+plot(combo)
+
+#信用区間
+mcmc_areas(fit_1$draws(c("beta_0","beta_1","beta_2")))
+```
+
+```
+#信用区間1
+mcmc_intervals(
+  sample,
+  regex_pars = c("P_1")
+)
+
+#信用区間2
+mcmc_intervals(
+  sample,
+  regex_pars = c("P_2")
+)
+```
+
+\newpage
+
+:::{.callout-note}
+## Rはみんなの友達!
+
+末永くよろしくね!
+:::
+
+:::{.callout-warning}
+## Rはみんなの友達!
+
+末永くよろしくね!
+:::
+
+:::{.callout-important}
+## Rはみんなの友達!
+
+末永くよろしくね!
+:::
+
+:::{.callout-tip}
+## Rはみんなの友達!
+
+末永くよろしくね!
+:::
+
+:::{.callout-caution}
+## Rはみんなの友達!
+
+末永くよろしくね!
+:::
+

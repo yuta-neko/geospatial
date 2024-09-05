@@ -1,0 +1,201 @@
+---
+title: "1部 導入編"
+subtitle: "5章 Rによる空間データの処理・可視化の基本"
+author: "柳樂 優太（1260404）"
+date: today
+execute: 
+  echo: true
+  warning: false
+  message: true
+format: 
+  pdf:
+    fig-width: 5
+    fig-height: 3
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    include-in-header:
+      - text: \setlength{\parindent}{1em}
+pdf-engine: lualatex
+documentclass: ltjsarticle 
+lang: ja
+---
+
+# 準備 {-}
+```{r global_option}
+## PDF に出力する際は cairo を使用する
+if (knitr::is_latex_output()) {
+  knitr::opts_chunk$set(dev = "cairo_pdf")
+}
+
+#パッケージの読み込み
+pacman::p_load(tidyverse, 
+               broom, 
+               coefplot, 
+               texreg,
+               parallel,
+               posterior,
+               patchwork,
+               ggplot2,
+               tidybayes,
+               ggfortify,
+               gridExtra,
+               forecast,
+               tseries,
+               summarytools,
+               forecast,
+               sf,
+               NipponMap,
+               RColorBrewer
+               )
+
+#日本語の設定
+if (.Platform$OS.type == "windows") { 
+  if (require(fontregisterer)) {
+    my_font <- "Yu Gothic"
+  } else {
+    my_font <- "Japan1"
+  }
+} else if (capabilities("aqua")) {
+  my_font <- "HiraginoSans-W3"
+} else {
+  my_font <- "IPAexGothic"
+}
+
+theme_set(theme_gray(base_size = 9,
+                     base_family = my_font))
+```
+
+
+
+
+# sfパッケージによる空間データ処理の例
+
+ファイルの読み込む
+```{r}
+shp <- system.file("shapes/jpn.shp", package = "NipponMap")[1]
+
+pref <- read_sf(shp)
+
+pref
+```
+
+座標参照系は以下のコマンドで確認できる
+
+```{r}
+st_crs(pref)
+```
+特に指定されてないようである
+
+CRS(座標参照系)を設定しよう
+
+```{r}
+st_crs(pref) <- 4326
+
+st_crs(pref)
+```
+
+
+CRSを指定したことで，幾何に関する様々な演算が行えるようになった
+
+|関数|説明|
+|---|---|
+|st_coordinates|位置座標系の計算|
+|st_area|面積の計算|
+|st_centroid|重心点の抽出|
+|st_distance|距離の計算|
+|st_union|同じ属性を持つ地物wp一つの地物に統合|
+|st_buffer|点または面から一定距離のバッファを発生|
+
+`投影変換`をすることで位置座標をメートルなど，別の単位に変換できる
+
+
+```{r}
+pref_tr <- st_transform(pref,crs=6677)
+```
+
+# sfパッケージによる地図化の実例
+
+都道府県別人口を地図化する
+
+```{r}
+#分かりやすさのために，沖縄を除外する
+pref2 <- pref[pref$name != "Okinawa",]
+
+plot(pref2[,"population"])
+```
+
+
+色の指定をしてみる
+
+```{r}
+display.brewer.all()
+```
+
+上記の中から色を指定する
+```{r}
+nc <- 7 #色分け数
+pal <- brewer.pal(nc, "RdYlGn")
+plot(pref2[,"population"],pal = pal, axes = TRUE, nbreaks = nc)
+```
+まだ改良の余地がある
+
+赤の割合が多すぎる
+
+人口の少ない箇所が赤いのは直感的でない
+
+凡例が見づらい
+
+余白が目立つ
+
+```{r}
+#色の閾値の設定
+breaks <- c(0, 1000000, 2000000,3000000, 5000000, 8000000,max(pref2$population))
+
+#ncの設定
+nc <- length(breaks)-1
+
+pal <- rev(brewer.pal(nc, "RdYlGn")) #色の反転
+
+plot(pref2[,"population"],
+     pal = pal,
+     axes = TRUE,
+     xlim = c(130.5, 145),
+     ylim = c(31,46),
+     breaks = breaks,
+     key.pos = 1,
+     key.length = 0.8
+     )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
